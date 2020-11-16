@@ -12,7 +12,7 @@ def main():
 
 
 def detection(packet):
-    if  check_ip_mac(packet):
+    if more_than_one_ip() and check_ip_mac(packet):
         print("Warning! ARP spoof attack detected")
 
 
@@ -43,13 +43,20 @@ def is_legal_mac(mac):
 
 def more_than_one_ip():
     with os.popen('arp -a') as arp:
+        broadcast_mac='ff:ff:ff:ff:ff:ff'
+        zero_mac = '00:00:00:00:00:00'
         table = arp.read()
-        index=0
         mac_addresses=[]
         table_info = table.split()
         for word in table_info:
             if is_legal_mac(word.replace('-', ':')):
-                mac_addresses.append(word)
+                if word!=broadcast_mac and word != zero_mac:
+                    mac_addresses.append(word)
+        sorted_macs = sorted(mac_addresses)
+        for index in range(len(sorted_macs)-1):
+            if mac_addresses[index] == mac_addresses[index+1]:
+                return True
+        return False
                 #check that mac is legal and if not-broadcast/network mac appears more than once - warning
 """def check_if_alive(packet):
     if packet[ARP].op==2:
