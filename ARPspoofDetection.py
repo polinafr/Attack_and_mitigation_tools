@@ -1,6 +1,7 @@
 from scapy.all import *
 #from scapy.layers.inet import IP
 from scapy.layers.l2 import ARP, getmacbyip, Ether
+import os
 
 
 
@@ -11,7 +12,7 @@ def main():
 
 
 def detection(packet):
-    if compare_macs(packet) and check_ip_mac(packet):
+    if  check_ip_mac(packet):
         print("Warning! ARP spoof attack detected")
 
 
@@ -22,12 +23,44 @@ def check_ip_mac(packet):
         # print("spoofed")
         return not (getmacbyip(proposed_IP) == packet[ARP].hwsrc)
 
+def more_than_one_ip():
+    with os.popen('arp -a') as arp:
+        table = arp.read()
+        index=0
+        mac_addresses=[]
+        table_info = table.split()
+        for word in table_info:
+            if is_legal_mac(word.replace('-', ':')):
+                mac_addresses.append(word)
+                #check that mac is legal and if not-broadcast/network mac appears more than once - warning
+"""def check_if_alive(packet):
+    if packet[ARP].op==2:
+        target_ip=packet[ARP].psrc
+        new_mac=packet[ARP].hwsrc
 
-def compare_macs(packet):
+        with os.popen('arp -a') as arp:
+            table = arp.read()
+            index=table.find(target_ip)
+            if index>0:
+                while table[index].isdigit() or table[index]=='.':
+                    index+=1
+
+                while table[index]==' ':
+                    index+=1
+                previous_mac=table[index:index+17].replace('-', ':')
+                if previous_mac!=packet[ARP].hwsrc:
+                    #check that the previous is not alive
+                    request = Ether(src=get_if_hwaddr(conf.iface), dst = previous_mac)/
+                    ans=sr1()
+"""
+
+
+
+"""def compare_macs(packet):
     if packet[ARP].op == 2:
         src_bool = (packet[ARP].hwsrc == packet[Ether].src)
         dst_bool = (packet[ARP].hwdst == packet[Ether].dst)
-        return (not src_bool) or (not dst_bool)
+        return (not src_bool) or (not dst_bool)"""
 
 
 
