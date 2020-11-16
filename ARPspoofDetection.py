@@ -23,6 +23,24 @@ def check_ip_mac(packet):
         # print("spoofed")
         return not (getmacbyip(proposed_IP) == packet[ARP].hwsrc)
 
+
+def is_legal_mac(mac):
+    if len(mac)!=17:
+        return False
+    pairs=mac.split(':')
+    for pair in pairs:
+        if len(pair)!=2:
+            return False
+        for letter in pair:
+            if letter>'f':
+                return False
+            if letter<'0':
+                return False
+            if letter>'9' and letter<'a':
+                return False
+    return True
+
+
 def more_than_one_ip():
     with os.popen('arp -a') as arp:
         table = arp.read()
